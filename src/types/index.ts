@@ -30,3 +30,9 @@ export interface IMovieEntity {
   id?: string;
   user_details?: IUserDetails;
 }
+
+export interface IPaginationRequestPayload {
+  limit?: number;
+  start?: number;
+  end: number;
+}
