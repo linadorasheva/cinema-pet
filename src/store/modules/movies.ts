@@ -1,7 +1,8 @@
 import { Getters, Actions, Module, createMapper } from "vuex-smart-module";
 import { AUTHORIZATION_HEADER_VALUE, MOVIE_REQUEST_URL, METHODS_REQUEST } from "@/assets/ts/constants";
 import { nanoid } from "nanoid";
-import { IMovieEntity, IPaginationRequestPayload } from "@/types";
+import { IPaginationRequestPayload } from "@/types";
+import { IMovieEntity } from "@/components/FilmCard/FilmCard.types";
 import { ExtendedMutations } from "@/utils/extended-mutations";
 
 interface IPaginationParams {
@@ -13,6 +14,7 @@ interface IPaginationParams {
 
 class MoviesState {
   movies: IMovieEntity[] = [];
+  loading = false;
 
   paginationParams: IPaginationParams = {
     items: [],
@@ -39,6 +41,9 @@ class MoviesMutations extends ExtendedMutations<MoviesState> {
 
 class MoviesActions extends Actions<MoviesState, MoviesGetters, MoviesMutations, MoviesActions> {
   async getMovies(): Promise<void> {
+    this.mutations.mutate({
+      loading: true,
+    });
     const headers = new Headers({
       authorization: `${AUTHORIZATION_HEADER_VALUE} ${nanoid(15)}`,
     });
@@ -51,7 +56,10 @@ class MoviesActions extends Actions<MoviesState, MoviesGetters, MoviesMutations,
 
       const moviesList: IMovieEntity[] = await response.json();
 
-      this.mutations.setMoviesValue(moviesList);
+      this.mutations.mutate({
+        movies: moviesList,
+        loading: false,
+      });
     } catch (e) {
       const errorData = await e.json();
       throw new Error(`Error: ${errorData}`);
@@ -59,6 +67,9 @@ class MoviesActions extends Actions<MoviesState, MoviesGetters, MoviesMutations,
   }
 
   public getPaginatedMovies(payload: IPaginationRequestPayload): void {
+    this.mutations.mutate({
+      loading: true,
+    });
     const moviesCopy = this.state.movies.slice();
     const result = moviesCopy.slice(payload.start, payload.end);
     this.mutations.mutate({
@@ -68,6 +79,7 @@ class MoviesActions extends Actions<MoviesState, MoviesGetters, MoviesMutations,
         start: this.state.paginationParams.start,
         end: payload.end,
       },
+      loading: false,
     });
   }
 }

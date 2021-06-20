@@ -4,7 +4,7 @@
     <p class="film-card__rating">{{ movieRating }}</p>
     <p class="film-card__info">
       <span class="film-card__year">{{ dateRelease }}</span>
-      <span class="film-card__duration">{{ movieDuration }}</span>
+      <span v-if="movieDuration" class="film-card__duration">{{ movieDuration }}</span>
       <span class="film-card__genre">{{ genreList }}</span>
     </p>
     <img :src="imgSource" alt="" class="film-card__poster" />
@@ -21,44 +21,48 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
-import { IMovieEntity } from "@/types";
+import { IOptions } from "./FilmCard.options";
 
 @Component
 export default class FilmCard extends Vue {
-  @Prop()
-  public card!: IMovieEntity;
+  @Prop({ required: true })
+  public options: IOptions;
 
   public get movieTitle(): string {
-    return this.card?.film_info?.title ?? "Неопознанный енот";
+    return this.options.card?.film_info?.title ?? "Неопознанный енот";
   }
 
   public get movieDescription(): string {
-    return this.card?.film_info?.description ?? "Упс. Кажется, описание фильма съела собака! ";
+    if (!this.options.card?.film_info?.description?.length) {
+      return "Упс. Кажется, описание фильма съела собака!";
+    }
+    return this.options.card?.film_info?.description?.length < 140 ? this.options.card?.film_info?.description : `${this.options.card?.film_info?.description?.slice(0, 140)}...`;
   }
 
-  public get movieRating(): string {
-    return this.card?.film_info?.total_rating ?? "0";
+  public get movieRating(): number {
+    return this.options.card?.film_info?.total_rating ?? 0;
   }
 
   public get movieQuantityComments(): string {
-    return `${this.card?.comments?.length} comments` ?? "No comments)";
+    return this.options.card?.comments?.length ? `${this.options.card?.comments?.length} comments` : "No comments";
   }
 
+  // Todo Продолжительность в формате часы минуты (например «1h 36m»);
   public get movieDuration(): string {
-    return this.card?.film_info?.runtime + " min.";
+    return this.options.card?.film_info?.runtime ? this.options.card?.film_info?.runtime + " min." : "";
   }
 
   public get genreList(): string {
-    return this.card?.film_info?.genre.join(", ") ?? "";
+    return this.options.card?.film_info?.genre?.join(", ") ?? "";
   }
 
   // Todo исправить на формат мес/год **/****
   public get dateRelease(): string {
-    return this.card?.film_info?.release.date.split("-")[0] ?? "";
+    return this.options.card?.film_info?.release?.date?.split("-")[0] ?? "";
   }
 
   public get imgSource(): string {
-    return `${this.card?.film_info?.poster}`;
+    return `${this.options.card?.film_info?.poster}`;
   }
 }
 </script>
