@@ -3,28 +3,30 @@
     <slot name="header" />
 
     <div class="films-list__container">
-      <slot name="content" />
+      <film-card v-for="card in options.movies" :options="{ card }" :key="`film-card-${card.id}`" />
     </div>
-    <button-component v-if="!isExtra">Show more</button-component>
+
+    <slot name="button" />
   </section>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
-import ButtonComponent from "@/components/ButtonComponent/index.vue";
+import FilmCard from "@/components/FilmCard/index.vue";
+import { IOptions } from "./FilmList.options";
 
 @Component({
   components: {
-    ButtonComponent,
+    FilmCard,
   },
 })
 export default class FilmList extends Vue {
-  @Prop({ type: Boolean, default: false })
-  public isExtra!: boolean;
+  @Prop({ required: true })
+  public options!: IOptions;
 
   public get listClass(): Record<string, boolean> {
     return {
-      "films-list--extra": this.isExtra,
+      "films-list--extra": this.options.isExtra,
     };
   }
 }
