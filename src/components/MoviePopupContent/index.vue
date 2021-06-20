@@ -1,70 +1,64 @@
 <template>
   <section class="film-details">
-    <form class="film-details__inner" action="" method="get">
+    <form class="film-details__inner">
       <div class="film-details__top-container">
         <div class="film-details__close">
-          <button class="film-details__close-btn" type="button">close</button>
+          <button class="film-details__close-btn" type="button" @click="closeModal">close</button>
         </div>
         <div class="film-details__info-wrap">
           <div class="film-details__poster">
-            <img class="film-details__poster-img" src="@/assets/images/posters/the-great-flamarion.jpg" alt="" />
+            <img class="film-details__poster-img" :src="imgSource" :alt="mainTitle" />
 
-            <p class="film-details__age">18+</p>
+            <p class="film-details__age">{{ ageRating }}</p>
           </div>
 
           <div class="film-details__info">
             <div class="film-details__info-head">
               <div class="film-details__title-wrap">
-                <h3 class="film-details__title">The Great Flamarion</h3>
-                <p class="film-details__title-original">Original: The Great Flamarion</p>
+                <h3 class="film-details__title">{{ mainTitle }}</h3>
+                <p class="film-details__title-original">Original: {{ alternativeTitle }}</p>
               </div>
 
               <div class="film-details__rating">
-                <p class="film-details__total-rating">8.9</p>
+                <p class="film-details__total-rating">{{ rating }}</p>
               </div>
             </div>
 
             <table class="film-details__table">
               <tr class="film-details__row">
                 <td class="film-details__term">Director</td>
-                <td class="film-details__cell">Anthony Mann</td>
+                <td class="film-details__cell">{{ director }}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Writers</td>
-                <td class="film-details__cell">Anne Wigton, Heinz Herald, Richard Weil</td>
+                <td class="film-details__cell">{{ listWriters }}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Actors</td>
-                <td class="film-details__cell">Erich von Stroheim, Mary Beth Hughes, Dan Duryea</td>
+                <td class="film-details__cell">{{ listActors }}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Release Date</td>
-                <td class="film-details__cell">30 March 1945</td>
+                <td class="film-details__cell">{{ dateRelease }}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Runtime</td>
-                <td class="film-details__cell">1h 18m</td>
+                <td class="film-details__cell">{{ movieDuration }}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Country</td>
-                <td class="film-details__cell">USA</td>
+                <td class="film-details__cell">{{ countryRelease }}</td>
               </tr>
               <tr class="film-details__row">
-                <td class="film-details__term">Genres</td>
+                <td class="film-details__term">{{ genresTitle }}</td>
                 <td class="film-details__cell">
-                  <span class="film-details__genre">Drama</span>
-                  <span class="film-details__genre">Film-Noir</span>
-                  <span class="film-details__genre">Mystery</span>
+                  <span v-for="(genre, index) in genres" :key="`film-details-genre-${index}`" class="film-details__genre">{{ genre }}</span>
                 </td>
               </tr>
             </table>
 
             <p class="film-details__film-description">
-              The film opens following a murder at a cabaret in Mexico City in 1936, and then presents the events leading up to it in flashback. The
-              Great Flamarion (Erich von Stroheim) is an arrogant, friendless, and misogynous marksman who displays his trick gunshot act in the
-              vaudeville circuit. His show features a beautiful assistant, Connie (Mary Beth Hughes) and her drunken husband Al (Dan Duryea),
-              Flamarion's other assistant. Flamarion falls in love with Connie, the movie's femme fatale, and is soon manipulated by her into killing
-              her no good husband during one of their acts.
+              {{ fullDescription }}
             </p>
           </div>
         </div>
@@ -83,7 +77,9 @@
 
       <div class="film-details__bottom-container">
         <section class="film-details__comments-wrap">
-          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">4</span></h3>
+          <h3 class="film-details__comments-title">
+            Comments: <span class="film-details__comments-count">{{ movieQuantityComments }}</span>
+          </h3>
 
           <ul class="film-details__comments-list">
             <li class="film-details__comment">
@@ -141,10 +137,10 @@
           </ul>
 
           <div class="film-details__new-comment">
-            <div class="film-details__add-emoji-label"/>
+            <div class="film-details__add-emoji-label" />
 
             <label class="film-details__comment-label">
-              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"/>
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" />
             </label>
 
             <div class="film-details__emoji-list">
@@ -176,8 +172,81 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
+import { Vue, Component, Prop, Emit } from "vue-property-decorator";
+import { IOptions } from "./MoviePopupContent.options";
+
+const NO_DATA = "";
 
 @Component
-export default class PopupComponent extends Vue {}
+export default class MoviePopupContent extends Vue {
+  @Prop({ required: true })
+  options!: IOptions;
+
+  public get ageRating(): string {
+    return this.options.card?.film_info.age_rating ? `+${this.options.card.film_info.age_rating}` : NO_DATA;
+  }
+
+  public get mainTitle(): string {
+    return this.options.card.film_info.title;
+  }
+
+  public get alternativeTitle(): string {
+    return this.options.card.film_info.alternative_title ?? NO_DATA;
+  }
+
+  public get rating(): number {
+    return this.options.card?.film_info.total_rating ?? 0;
+  }
+
+  public get fullDescription(): string {
+    return this.options.card.film_info.description;
+  }
+
+  public get director(): string {
+    return this.options.card.film_info.director;
+  }
+
+  public get listWriters(): string {
+    return this.options.card.film_info.writers.join(", ");
+  }
+
+  public get listActors(): string {
+    return this.options.card.film_info.actors.join(", ");
+  }
+
+  // Todo исправить на формат мес/год **/****
+  public get dateRelease(): string {
+    return this.options.card.film_info.release.date.split("-")[0] ?? "";
+  }
+
+  public get countryRelease(): string {
+    return this.options.card.film_info.release.release_country ?? "";
+  }
+
+  public get imgSource(): string {
+    return `${this.options.card.film_info.poster}`;
+  }
+
+  // Todo Продолжительность в формате часы минуты (например «1h 36m»);
+  public get movieDuration(): string {
+    return this.options.card.film_info.runtime ? this.options.card.film_info.runtime + " min." : "";
+  }
+
+  public get genres(): string[] {
+    return this.options.card.film_info.genre ?? [];
+  }
+
+  public get genresTitle(): string {
+    return this.options.card.film_info.genre.length > 1 ? "Genres" : "Genre";
+  }
+
+  public get movieQuantityComments(): string {
+    return this.options.card.comments.length ? `${this.options.card.comments.length} comments` : "No comments";
+  }
+
+  @Emit("close")
+  public closeModal(): string {
+    return "close";
+  }
+}
 </script>
