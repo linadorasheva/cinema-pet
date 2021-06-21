@@ -97,7 +97,7 @@ export default class Home extends Mixins(Stored) {
   public get moviesListMostCommented(): IMovieEntity[] {
     const moviesCopy = this.movies.slice();
     moviesCopy.sort((a: IMovieEntity, b: IMovieEntity) => {
-      return b.comments?.length - a.comments?.length;
+      return b.comments.length - a.comments.length;
     });
 
     return moviesCopy.slice(0, 2);
@@ -106,7 +106,7 @@ export default class Home extends Mixins(Stored) {
   public get moviesListTopRated(): IMovieEntity[] {
     const moviesCopy = this.movies.slice();
     moviesCopy.sort((a: IMovieEntity, b: IMovieEntity) => {
-      return b.film_info?.total_rating - a.film_info?.total_rating;
+      return b.film_info.total_rating - a.film_info.total_rating;
     });
 
     return moviesCopy.slice(0, 2);
